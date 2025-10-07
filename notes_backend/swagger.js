@@ -4,10 +4,22 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'My Express API',
+      title: 'Personal Notes API',
       version: '1.0.0',
-      description: 'A simple Express API documented with Swagger',
-    }
+      description: 'Express API for a personal notes organizer',
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }
+      }
+    },
+    security: [{ bearerAuth: [] }],
+    tags: [
+      { name: 'Auth', description: 'Authentication endpoints' },
+      { name: 'Users', description: 'User profile endpoints' },
+      { name: 'Notes', description: 'Personal notes management' },
+      { name: 'Health', description: 'Service health check' }
+    ]
   },
   apis: ['./src/routes/*.js'], // Path to the API docs
 };

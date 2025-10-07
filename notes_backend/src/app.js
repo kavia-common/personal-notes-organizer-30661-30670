@@ -3,14 +3,16 @@ const express = require('express');
 const routes = require('./routes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('../swagger');
+const errorHandler = require('./middleware/errorHandler');
 
 // Initialize express app
 const app = express();
 
 app.use(cors({
-  origin: '*',
+  origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 app.set('trust proxy', true);
 app.use('/docs', swaggerUi.serve, (req, res, next) => {
@@ -34,6 +36,16 @@ app.use('/docs', swaggerUi.serve, (req, res, next) => {
         url: `${protocol}://${fullHost}`,
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    },
+    security: [{ bearerAuth: [] }]
   };
   swaggerUi.setup(dynamicSpec)(req, res, next);
 });
@@ -44,13 +56,7 @@ app.use(express.json());
 // Mount routes
 app.use('/', routes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    status: 'error',
-    message: 'Internal Server Error',
-  });
-});
+// Error handling middleware (centralized)
+app.use(errorHandler);
 
 module.exports = app;
